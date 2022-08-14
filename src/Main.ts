@@ -1,6 +1,6 @@
 import * as PIXI from 'pixi.js';
 import {AssetsManager} from './managers/AssetsManager';
-import {Video} from './video/Video';
+import {Audio} from './audio/Audio';
 
 
 export class Main extends PIXI.Container {
@@ -23,7 +23,6 @@ export class Main extends PIXI.Container {
 
 	private createChildren = () => {
 
-		this.addChild(Video.instance);
-		Video.instance.show('video.mp4');
+		this.addChild(Audio.instance).show('audio.mp3');
 	}
 }

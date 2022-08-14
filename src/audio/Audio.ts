@@ -9,22 +9,15 @@ import {Navi} from './Navi';
 export class Audio extends PIXI.Sprite {
 
     private static _instance: Audio;
-
-    private content: PIXI.Sprite;
-
     private audio!: HTMLAudioElement | null;
-
-    private preloader: VideoPreloader;
-
-    private video_width: number;
-    private video_height: number;
-
     private ended: boolean = false;
-
     private first: boolean = true;
-
     private playbackRate: number = 1;
 
+    private audioContext: AudioContext;
+    private analyser: AnalyserNode;
+    public spectrumArray: Uint8Array;
+    public volumeArray: Float32Array;
 
     public static get instance(): Audio {
         if (Audio._instance == null) Audio._instance = new Audio();
@@ -34,29 +27,13 @@ export class Audio extends PIXI.Sprite {
     constructor() {
         super();
 
-        this.video_width = Application.WIDTH;
-        this.video_height = Application.HEIGHT;
+        this.audioContext = new AudioContext();
+        this.analyser = this.audioContext.createAnalyser();
+        this.analyser.smoothingTimeConstant = 0.3;
+        this.analyser.fftSize = 2048;
+        this.spectrumArray = new Uint8Array(this.analyser.frequencyBinCount);
 
-        this.texture = TextureHelper.createFillTexture(new PIXI.Point(Application.WIDTH, Application.HEIGHT), rgba_create(0xffffff));
-
-
-        this.content = new PIXI.Sprite();
-        this.content.texture = PIXI.Texture.EMPTY;
-        this.addChild(this.content);
-
-
-
-        this.visible = false;
-        this.alpha = 0;
-
-
-        this.content.visible = false;
-
-
-        this.preloader = new VideoPreloader(this.video_width, this.video_height);
-        this.addChild(this.preloader);
-
-        this.addChild(Navi.instance);
+        this.volumeArray = new Float32Array(this.analyser.frequencyBinCount);
     }
 
     public play = () => {
@@ -72,7 +49,6 @@ export class Audio extends PIXI.Sprite {
 
     public seek = (value: number) => {
         if (this.audio != null) {
-            this.content.visible = false;
             this.audio.currentTime = value * this.audio.duration;
         }
     }
@@ -84,7 +60,7 @@ export class Audio extends PIXI.Sprite {
         }
     }
 
-    private onVideoEvent = (event: Event) => {
+    private onAudioEvent = (event: Event) => {
         switch (event.type) {
 
             case 'canplaythrough':
@@ -92,17 +68,14 @@ export class Audio extends PIXI.Sprite {
                 if (this.first == false) return;
                 this.first = false;
 
-                this.preloader.stop();
-
-                this.content.width = this.video_width;
-                this.content.height = this.video_height;
-                this.content.visible = true;
-
                 if (this.ended == true) return;
                 if (this.audio != null) this.audio.play();
 
+                let source = this.audioContext.createMediaElementSource(this.audio as HTMLMediaElement);
+                source.connect(this.analyser);
+                this.analyser.connect(this.audioContext.destination);
+
                 Navi.instance.show();
-                console.log(event);
                 break;
 
             case 'play':
@@ -130,7 +103,6 @@ export class Audio extends PIXI.Sprite {
 
 
             case 'seeked':
-                this.content.visible = true;
                 break;
         }
     }
@@ -141,31 +113,24 @@ export class Audio extends PIXI.Sprite {
         Navi.instance.audioEnabled = true;
 
         if (this.audio != null) {
-            this.audio.removeEventListener('canplaythrough', this.onVideoEvent, false);
-            this.audio.removeEventListener('timeupdate', this.onVideoEvent, false);
-            this.audio.removeEventListener('ended', this.onVideoEvent, false);
+            this.audio.removeEventListener('canplaythrough', this.onAudioEvent, false);
+            this.audio.removeEventListener('timeupdate', this.onAudioEvent, false);
+            this.audio.removeEventListener('ended', this.onAudioEvent, false);
             this.audio = null;
         }
-
-        this.preloader.start();
-        this.content.visible = false;
 
         this.audio = document.createElement('audio') as HTMLAudioElement;
         this.audio.src = AssetsManager.SOUNDS + file_name;
         this.audio.loop = false;
-        this.audio.addEventListener('canplaythrough', this.onVideoEvent, false);
-        this.audio.addEventListener('timeupdate', this.onVideoEvent, false);
-        this.audio.addEventListener('ended', this.onVideoEvent, false);
-        this.audio.addEventListener('play', this.onVideoEvent, false);
-        this.audio.addEventListener('pause', this.onVideoEvent, false);
+        this.audio.addEventListener('canplaythrough', this.onAudioEvent, false);
+        this.audio.addEventListener('timeupdate', this.onAudioEvent, false);
+        this.audio.addEventListener('ended', this.onAudioEvent, false);
+        this.audio.addEventListener('play', this.onAudioEvent, false);
+        this.audio.addEventListener('pause', this.onAudioEvent, false);
 
-        this.audio.addEventListener('seeking', this.onVideoEvent, false);
-        this.audio.addEventListener('seeked', this.onVideoEvent, false);
-
-        this.visible = true;
-        this.alpha = 1;
+        this.audio.addEventListener('seeking', this.onAudioEvent, false);
+        this.audio.addEventListener('seeked', this.onAudioEvent, false);
     }
-
 
     public stop = () => {
         if (this.audio != null) this.audio.pause();
@@ -177,6 +142,13 @@ export class Audio extends PIXI.Sprite {
 
         if (this.audio != null) this.audio.pause();
         new StorylineManager().goNext();
+    }
+
+    public tick = () => {
+        this.analyser.getByteTimeDomainData(this.spectrumArray);
+        this.analyser.getFloatFrequencyData(this.volumeArray);
+        this.emit('spectrum', this.spectrumArray);
+        this.emit('volume', this.volumeArray);
     }
 }
 

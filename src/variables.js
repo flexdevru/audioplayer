@@ -1,3 +1,3 @@
-var showhelp_var = "template-videoplayer_showhelp";
-var completed_var = "template-videoplayer_completed";
-var store_var = "template-videoplayer_store";
+var showhelp_var = "template-audioplayer_showhelp";
+var completed_var = "template-audioplayer_completed";
+var store_var = "template-audioplayer_store";

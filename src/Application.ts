@@ -4,6 +4,7 @@ import {FullScreenManager} from './managers/FullScreenManager';
 import {StorylineManager} from './managers/StorylineManager';
 import {FontsManager} from './managers/FontsManager';
 import {CompilationParams} from './utils/CompilationParams';
+import {Audio} from './audio/Audio';
 
 export class Application {
 	private static _instance: Application;
@@ -55,6 +56,7 @@ export class Application {
 		this.application.ticker.add(() => {
 			this.renderer.render(this.application.stage);
 			StorylineManager.instance.inPlayer ? FullScreenManager.instance.scale() : FullScreenManager.instance.centerFit();
+			Audio.instance.tick();
 		});
 	}
 

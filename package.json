@@ -1,0 +1,37 @@
+{
+  "name": "template",
+  "version": "0.0.1",
+  "description": "template pixi application",
+  "main": "./src/Application.js",
+  "scripts": {
+    "start": "webpack serve --mode development --progress",
+    "build": "webpack --mode production"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@pixi/sound": "^4.2.0",
+    "gsap": "^3.10.4",
+    "json5": "^2.2.1",
+    "jspdf": "^2.5.1",
+    "pixi-multistyle-text": "^0.10.0",
+    "pixi-textinput-v5": "^4.0.0-beta.10",
+    "pixi.js": "^6.4.2",
+    "webfontloader": "^1.6.28"
+  },
+  "devDependencies": {
+    "@types/node": "^18.0.5",
+    "@types/webfontloader": "^1.6.34",
+    "clean-webpack-plugin": "^4.0.0",
+    "copy-webpack-plugin": "^11.0.0",
+    "html-webpack-plugin": "^5.5.0",
+    "ts-loader": "^9.3.1",
+    "tsconfig-paths-webpack-plugin": "^3.5.2",
+    "typescript": "^4.7.4",
+    "webpack": "^5.73.0",
+    "webpack-bundle-analyzer": "^4.5.0",
+    "webpack-cli": "^4.10.0",
+    "webpack-dev-server": "^4.9.3",
+    "webpack-prebuild-plugin": "^0.0.2"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "noImplicitAny": false,
+    "noEmitOnError": true,
+    "removeComments": false,
+    "sourceMap": true,
+    "target": "es5",
+	  "declaration": false, 
+	  "strict": true,
+    "allowSyntheticDefaultImports": true,
+	  "typeRoots" : ["node_modules/pixi.js"],
+    "types": ["pixi.js"]
+  },
+  "include": [
+    "./src"
+  ],
+  "exclude": [
+    "node_modules",
+	"build"
+  ]
+}
